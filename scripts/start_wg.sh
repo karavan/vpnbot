@@ -16,4 +16,5 @@ cat /ssh/key.pub > /root/.ssh/authorized_keys
 echo 'HostKeyAlgorithms +ssh-rsa' >> /etc/ssh/sshd_config
 echo 'PubkeyAcceptedKeyTypes +ssh-rsa' >> /etc/ssh/sshd_config
 service ssh start
+prometheus_wireguard_exporter -n /etc/wireguard/wg0.conf
 tail -f /dev/null

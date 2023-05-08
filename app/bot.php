@@ -434,7 +434,8 @@ class Bot
         $server = $this->readConfig();
         foreach ($server['peers'] as $k => $v) {
             if ($v['AllowedIPs'] == $clients[$client]['interface']['Address']) {
-                $server['peers'][$k]['## name'] = $name;
+                unset($server['peers'][$k]['## name']);
+                $server['peers'][$k]['# friendly_name'] = $name;
             }
         }
         $this->restartWG($this->createConfig($server));

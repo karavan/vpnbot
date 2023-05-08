@@ -14,6 +14,8 @@ networks:
                 - subnet: 10.10.0.0/24
 volumes:
     adguard:
+    prometheus:
+    grafana:
 
 services:
     ng:
@@ -201,4 +203,42 @@ services:
         networks:
             default:
                 ipv4_address: 10.10.0.6
+        logging: *default-logging
+    pr:
+        image: prom/prometheus
+        hostname: prometheus
+        depends_on:
+            - wg
+        volumes:
+            - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+            - type: volume
+              target: /prometheus
+              source: prometheus
+        environment:
+            TZ: ${TZ}
+        stop_grace_period: 1s
+        networks:
+            default:
+                ipv4_address: 10.10.0.8
+        logging: *default-logging
+    gr:
+        image: grafana/grafana
+        hostname: grafana
+        volumes:
+            - type: volume
+              target: /var/lib/grafana
+              source: grafana
+            - ./config/grafana:/etc/grafana
+            - ./config/wg_grafana.json:/var/lib/grafana/dashboards/wireguard.json
+        ports:
+            - ${GRPORT}:3000
+        depends_on:
+            - pr
+        environment:
+            TZ: ${TZ}
+            GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/wireguard.json
+        stop_grace_period: 1s
+        networks:
+            default:
+                ipv4_address: 10.10.0.9
         logging: *default-logging
