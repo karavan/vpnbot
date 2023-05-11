@@ -3,7 +3,7 @@ arg RELEASE
 from ${SYSTEM}:${RELEASE}
 ENV DEBIAN_FRONTEND noninteractive
 run apt update && \
-apt install -y linux-headers-$(uname -r) iproute2 iptables xtables-addons-common xtables-addons-dkms wireguard ssh rustc cargo git && \
+apt install -y linux-headers-$(uname -r) iproute2 net-tools iptables xtables-addons-common xtables-addons-dkms wireguard ssh rustc cargo git && \
 apt clean autoclean && \
 apt autoremove -y && \
 mkdir /root/.ssh && \
