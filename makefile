@@ -6,10 +6,10 @@ unhosts:
 	sed -i '/test.ru/d' /mnt/c/Windows/System32/drivers/etc/hosts
 u: # запуск контейнеров
 	RELEASE=$(shell lsb_release -rs) SYSTEM=$(shell lsb_release -is | tr '[:upper:]' '[:lower:]') docker compose up -d --build --force-recreate
-# 	sleep 1
-# 	docker compose logs unit wg ss proxy
 d: # остановка контейнеров
 	docker compose down
+dv: d # остановка контейнеров
+	docker volume rm vpnbot_prometheus vpnbot_grafana
 r: d u
 ps: # список контейнеров
 	docker compose ps
