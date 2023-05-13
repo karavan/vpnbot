@@ -16,5 +16,10 @@ cat /ssh/key.pub > /root/.ssh/authorized_keys
 echo 'HostKeyAlgorithms +ssh-rsa' >> /etc/ssh/sshd_config
 echo 'PubkeyAcceptedKeyTypes +ssh-rsa' >> /etc/ssh/sshd_config
 service ssh start
-wireguard_exporter
+if [ $(cat /aliases | wc -c) -eq 0 ]
+then
+    wireguard_exporter
+else
+    wireguard_exporter -a "$(cat /aliases)"
+fi
 tail -f /dev/null

@@ -58,6 +58,7 @@ services:
             - ./config/php.ini:/usr/local/etc/php/php.ini
             - ./config/clients.json:/config/clients.json
             - ./config/pac.json:/config/pac.json
+            - ./config/aliases:/config/aliases
             - ./config/unit.json:/config/unit.json
             - ./config/AdGuardHome.yaml:/config/AdGuardHome.yaml
             - ./config/nginx.conf:/config/nginx.conf
@@ -127,6 +128,7 @@ services:
         volumes:
             - ./config/.profile:/root/.bashrc:ro
             - ./config/wg0.conf:/etc/wireguard/wg0.conf
+            - ./config/aliases:/aliases
             - ./scripts/start_wg.sh:/start_wg.sh
             - ./scripts/reset_wg.sh:/reset_wg.sh
             - ./scripts/block_torrent.sh:/block_torrent.sh
@@ -138,7 +140,6 @@ services:
                 condition: service_healthy
         ports:
             - ${WGPORT}:${WGPORT}/udp
-            - 9586:9586
         environment:
             TZ: ${TZ}
             WGPORT: ${WGPORT}
@@ -212,8 +213,6 @@ services:
         hostname: prometheus
         depends_on:
             - wg
-        ports:
-            - 9090:9090
         volumes:
             - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
             - type: volume

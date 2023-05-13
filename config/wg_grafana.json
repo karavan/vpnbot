@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 36,
+  "id": 8,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -35,9 +35,6 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -51,7 +48,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -63,6 +61,9 @@
       },
       "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -71,10 +72,9 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
-      "pluginVersion": "9.3.2",
+      "pluginVersion": "9.5.1",
       "targets": [
         {
           "datasource": {
@@ -83,7 +83,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "wireguard_peers_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}",
+          "expr": "wireguard_peers_total{}",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -91,7 +91,7 @@
         }
       ],
       "title": "Peers total",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -136,7 +136,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.3.2",
+      "pluginVersion": "9.5.1",
       "targets": [
         {
           "datasource": {
@@ -144,7 +144,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"rx\"}",
+          "expr": "wireguard_bytes_total{direction=\"rx\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -196,7 +196,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.3.2",
+      "pluginVersion": "9.5.1",
       "targets": [
         {
           "datasource": {
@@ -204,7 +204,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"tx\"}",
+          "expr": "wireguard_bytes_total{direction=\"tx\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -293,7 +293,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(irate(wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}[5m])) by (direction)",
+          "expr": "sum(irate(wireguard_bytes_total{}[5m])) by (direction)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -315,7 +315,9 @@
           },
           "custom": {
             "align": "auto",
-            "displayMode": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
             "inspect": false
           },
           "mappings": [],
@@ -392,7 +394,9 @@
       },
       "id": 9,
       "options": {
+        "cellHeight": "sm",
         "footer": {
+          "countRows": false,
           "fields": "",
           "reducer": [
             "sum"
@@ -401,7 +405,7 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "9.3.2",
+      "pluginVersion": "9.5.1",
       "targets": [
         {
           "datasource": {
@@ -410,7 +414,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}) by (hostname, peer, interface) * on(hostname, peer, interface) group_left(name) wireguard_meta ",
+          "expr": "sum(wireguard_peer_bytes_total{}) by (hostname, peer, interface) * on(hostname, peer, interface) group_left(name) wireguard_meta ",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -423,7 +427,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "max(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"rx\"}) by (hostname, peer)",
+          "expr": "max(wireguard_peer_bytes_total{direction=\"rx\"}) by (hostname, peer)",
           "format": "table",
           "hide": false,
           "legendFormat": "__auto",
@@ -436,7 +440,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "max(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"tx\"}) by (hostname, peer)",
+          "expr": "max(wireguard_peer_bytes_total{direction=\"tx\"}) by (hostname, peer)",
           "format": "table",
           "hide": false,
           "legendFormat": "__auto",
@@ -449,7 +453,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "wireguard_duration_since_latest_handshake{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"} / 1000",
+          "expr": "wireguard_duration_since_latest_handshake{} / 1000",
           "format": "table",
           "hide": false,
           "legendFormat": "__auto",
@@ -522,68 +526,18 @@
       "type": "table"
     }
   ],
-  "schemaVersion": 37,
+  "refresh": "",
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
+          "isNone": true,
           "selected": false,
-          "text": "d13",
-          "value": "d13"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "Prometheus"
-        },
-        "definition": "label_values(up{job=\"wireguard_exporter\"}, dc)",
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "dc",
-        "options": [],
-        "query": {
-          "query": "label_values(up{job=\"wireguard_exporter\"}, dc)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "router-1.node.d13.consul",
-          "value": "router-1.node.d13.consul"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "Prometheus"
-        },
-        "definition": "label_values(up{job=\"wireguard_exporter\", dc=~\"$dc\"}, hostname)",
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "hostname",
-        "options": [],
-        "query": {
-          "query": "label_values(up{job=\"wireguard_exporter\", dc=~\"$dc\"}, hostname)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "wg-private",
-          "value": "wg-private"
+          "text": "None",
+          "value": ""
         },
         "datasource": {
           "type": "prometheus",
@@ -613,8 +567,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Wireguard",
+  "title": "Wireguard_New",
   "uid": "VvkwMHPVz",
-  "version": 12,
+  "version": 10,
   "weekStart": ""
 }

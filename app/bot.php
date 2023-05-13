@@ -2239,9 +2239,9 @@ DNS-over-HTTPS with IP:
         $public_peer_key   = trim($this->ssh("echo $private_peer_key | wg pubkey"));
 
         $conf['peers'][] = [
-            '## name'    => $client_ip . ($name ? " ($name)" : ''),
-            'PublicKey'  => $public_peer_key,
-            'AllowedIPs' => "$client_ip/32",
+            '# friendly_name' => $client_ip . ($name ? " ($name)" : ''),
+            'PublicKey'       => $public_peer_key,
+            'AllowedIPs'      => "$client_ip/32",
         ];
         $client_conf = [
             'interface' => [
@@ -2301,6 +2301,21 @@ DNS-over-HTTPS with IP:
         $this->ssh("wg-quick down wg0");
         $this->ssh("echo '$conf_str' > /etc/wireguard/wg0.conf");
         $this->ssh("wg-quick up wg0");
+        $r = $this->readConfig();
+        if (!empty($r['peers'])) {
+            foreach ($r['peers'] as $v) {
+                if (!empty($v['PublicKey']) && !empty($v['# friendly_name'])) {
+                    $aliases[] = "{$v['PublicKey']}:{$v['# friendly_name']}";
+                }
+            }
+        }
+        file_put_contents('/config/aliases', $aliases ? implode(',', $aliases) : '');
+        $this->ssh('pkill -9 -f wireguard_exporter');
+        if ($aliases) {
+            $this->ssh('wireguard_exporter -a "' . implode(',', $aliases) . '" > /dev/null &');
+        } else {
+            $this->ssh('wireguard_exporter > /dev/null &');
+        }
         return true;
     }
 
