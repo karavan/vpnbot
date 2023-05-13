@@ -138,6 +138,7 @@ services:
                 condition: service_healthy
         ports:
             - ${WGPORT}:${WGPORT}/udp
+            - 9586:9586
         environment:
             TZ: ${TZ}
             WGPORT: ${WGPORT}
@@ -211,6 +212,8 @@ services:
         hostname: prometheus
         depends_on:
             - wg
+        ports:
+            - 9090:9090
         volumes:
             - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
             - type: volume

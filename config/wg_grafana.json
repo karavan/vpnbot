@@ -21,320 +21,22 @@
       }
     ]
   },
-  "description": "Metrics for Wireguard VPN",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": 17251,
-  "graphTooltip": 0,
-  "id": 2,
+  "graphTooltip": 1,
+  "id": 36,
   "links": [],
-  "liveNow": true,
+  "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
         "uid": "Prometheus"
       },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 85
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byType",
-              "options": "number"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "decbytes"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 13,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 30,
-      "links": [],
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "9.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "rate(wireguard_received_bytes_total[$__rate_interval])",
-          "format": "heatmap",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{friendly_name}} {{allowed_ips}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Connected Clients (SI)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byType",
-              "options": "number"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "decbytes"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 13
-      },
-      "id": 18,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "rate( wireguard_received_bytes_total[$__rate_interval])",
-          "legendFormat": "{{friendly_name}} {{allowed_ips}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Received Bytes",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byType",
-              "options": "number"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "decbytes"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 13
-      },
-      "id": 28,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "rate(wireguard_sent_bytes_total[$__rate_interval])",
-          "legendFormat": "{{friendly_name}} {{allowed_ips}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Send Bytes",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "fillOpacity": 70,
-            "lineWidth": 0,
-            "spanNulls": false
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -354,28 +56,25 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
+        "h": 6,
+        "w": 5,
         "x": 0,
-        "y": 21
+        "y": 0
       },
-      "id": 8,
+      "id": 2,
       "options": {
-        "alignValue": "left",
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "pluginVersion": "9.2.1",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "datasource": {
@@ -383,42 +82,522 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(wireguard_latest_handshake_seconds[$__rate_interval])",
-          "legendFormat": "{{friendly_name}} {{allowed_ips}}",
+          "exemplar": false,
+          "expr": "wireguard_peers_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Peers total",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"rx\"}",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Latest Handshakes (Seconds)",
-      "type": "state-timeline"
+      "title": "Total bytes RX",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 10,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"tx\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total bytes TX",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(irate(wireguard_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}[5m])) by (direction)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RX/TX rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TX"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RX"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Traffic total"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "decbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last HS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dtdurations"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 9,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"}) by (hostname, peer, interface) * on(hostname, peer, interface) group_left(name) wireguard_meta ",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"rx\"}) by (hostname, peer)",
+          "format": "table",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max(wireguard_peer_bytes_total{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\", direction=\"tx\"}) by (hostname, peer)",
+          "format": "table",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "wireguard_duration_since_latest_handshake{dc=~\"$dc\", hostname=~\"$hostname\", interface=~\"$interface\"} / 1000",
+          "format": "table",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Peers information",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "peer",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Value": false,
+              "__name__": true,
+              "dc": true,
+              "hostname": true,
+              "hostname 1": true,
+              "hostname 3": true,
+              "hostname 4": true,
+              "instance": true,
+              "interface": true,
+              "ip": true,
+              "job": true,
+              "peer": true
+            },
+            "indexByName": {
+              "Time 1": 6,
+              "Time 2": 8,
+              "Time 3": 10,
+              "Time 4": 12,
+              "Value #A": 3,
+              "Value #B": 1,
+              "Value #C": 2,
+              "Value #D": 4,
+              "dc": 13,
+              "hostname 1": 7,
+              "hostname 2": 9,
+              "hostname 3": 11,
+              "hostname 4": 14,
+              "instance": 15,
+              "interface": 16,
+              "ip": 17,
+              "job": 18,
+              "name": 0,
+              "peer": 5
+            },
+            "renameByName": {
+              "Value #A": "Traffic total",
+              "Value #B": "TX",
+              "Value #C": "RX",
+              "Value #D": "Last HS",
+              "name": "Peer"
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
-  "refresh": "",
-  "schemaVersion": 38,
+  "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "isNone": true,
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "d13",
+          "value": "d13"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "Prometheus"
         },
-        "definition": "",
+        "definition": "label_values(up{job=\"wireguard_exporter\"}, dc)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
-        "name": "query0",
+        "name": "dc",
         "options": [],
         "query": {
-          "query": "",
-          "refId": "Prometheus-query0-Variable-Query"
+          "query": "label_values(up{job=\"wireguard_exporter\"}, dc)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "router-1.node.d13.consul",
+          "value": "router-1.node.d13.consul"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "Prometheus"
+        },
+        "definition": "label_values(up{job=\"wireguard_exporter\", dc=~\"$dc\"}, hostname)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "hostname",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"wireguard_exporter\", dc=~\"$dc\"}, hostname)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "wg-private",
+          "value": "wg-private"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "Prometheus"
+        },
+        "definition": "label_values(wireguard_peers_total{dc=~\"$dc\", hostname=~\"$hostname\"}, interface)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "interface",
+        "options": [],
+        "query": {
+          "query": "label_values(wireguard_peers_total{dc=~\"$dc\", hostname=~\"$hostname\"}, interface)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -435,7 +614,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Wireguard",
-  "uid": "CJRCJWNVk",
-  "version": 1,
+  "uid": "VvkwMHPVz",
+  "version": 12,
   "weekStart": ""
 }

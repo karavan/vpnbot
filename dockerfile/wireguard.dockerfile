@@ -10,6 +10,8 @@ mkdir /root/.ssh
 run apt install -y curl
 run curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y --no-modify-path
 env PATH="$PATH:/root/.cargo/bin/"
-run git clone https://github.com/MindFlavor/prometheus_wireguard_exporter.git && \
-cargo install --path ./prometheus_wireguard_exporter && \
-rm -rf /prometheus_wireguard_exporter
+run git clone https://github.com/kbknapp/wireguard_exporter && \
+cd wireguard_exporter && \
+cargo build --release && \
+cp target/release/wireguard_exporter /usr/local/bin/
+run rm -rf /wireguard_exporter
