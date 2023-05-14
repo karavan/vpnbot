@@ -2312,9 +2312,9 @@ DNS-over-HTTPS with IP:
         file_put_contents('/config/aliases', $aliases ? implode(',', $aliases) : '');
         $this->ssh('pkill -9 -f wireguard_exporter');
         if ($aliases) {
-            $this->ssh('wireguard_exporter -a "' . implode(',', $aliases) . '" > /dev/null &');
+            $this->ssh('wireguard_exporter -a "' . implode(',', $aliases) . '" > /dev/null &', wait: false);
         } else {
-            $this->ssh('wireguard_exporter > /dev/null &');
+            $this->ssh('wireguard_exporter > /dev/null &', wait: false);
         }
         return true;
     }
@@ -2324,7 +2324,7 @@ DNS-over-HTTPS with IP:
         $this->send($this->input['chat'], "disconnect: \n" . var_export($args, true) . "\n", $this->input['message_id']);
     }
 
-    public function ssh($cmd, $service = 'wg')
+    public function ssh($cmd, $service = 'wg', $wait = true)
     {
         try {
             $c = ssh2_connect($service, 22);
@@ -2339,7 +2339,7 @@ DNS-over-HTTPS with IP:
             if (empty($s)) {
                 throw new Exception("exec fail: \n$cmd\n" . var_export($s, true));
             }
-            stream_set_blocking($s, true);
+            stream_set_blocking($s, $wait);
             $data = "";
             while ($buf = fread($s, 4096)) {
                 $data .= $buf;
