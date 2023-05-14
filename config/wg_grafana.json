@@ -493,31 +493,24 @@
               "peer": true
             },
             "indexByName": {
-              "Time 1": 6,
-              "Time 2": 8,
-              "Time 3": 10,
-              "Time 4": 12,
-              "Value #A": 3,
+              "Time 1": 5,
+              "Time 2": 6,
+              "Time 3": 7,
               "Value #B": 1,
               "Value #C": 2,
-              "Value #D": 4,
-              "dc": 13,
-              "hostname 1": 7,
-              "hostname 2": 9,
-              "hostname 3": 11,
-              "hostname 4": 14,
-              "instance": 15,
-              "interface": 16,
-              "ip": 17,
-              "job": 18,
-              "name": 0,
-              "peer": 5
+              "Value #D": 3,
+              "alias": 0,
+              "instance": 8,
+              "interface": 9,
+              "job": 10,
+              "peer": 4
             },
             "renameByName": {
               "Value #A": "Traffic total",
               "Value #B": "TX",
               "Value #C": "RX",
               "Value #D": "Last HS",
+              "alias": "Peer",
               "name": "Peer"
             }
           }
@@ -562,13 +555,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Wireguard_New",
   "uid": "VvkwMHPVz",
-  "version": 10,
-  "weekStart": ""
+  "version": 14,
+  "weekStart": "monday"
 }
