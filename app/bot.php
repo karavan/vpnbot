@@ -1346,13 +1346,18 @@ DNS-over-HTTPS with IP:
 
     public function statusWg(int $page = 0)
     {
-        $conf   = $this->readConfig();
-        $status = $this->readStatus();
-        $text[] = 'Server:';
-        $text[] = "  address: {$conf['interface']['Address']}";
-        $text[] = "  port: {$status['interface']['listening port']}";
-        $text[] = "  publickey: {$status['interface']['public key']}";
-        $text[] = "\nPeers:";
+        $conf      = $this->readConfig();
+        $status    = $this->readStatus();
+        $pac       = $this->getPacConf();
+        $ip        = $this->ip;
+        $domain    = $pac['domain'] ?: $ip;
+        $scheme    = empty($ssl = $this->nginxGetTypeCert()) ? 'http' : 'https';
+        $graf_link = "$scheme://$domain:" . getenv('GRPORT') . "\n\n";
+        $text[]    = 'Server:';
+        $text[]    = "  address: {$conf['interface']['Address']}";
+        $text[]    = "  port: {$status['interface']['listening port']}";
+        $text[]    = "  publickey: {$status['interface']['public key']}";
+        $text[]    = "\nPeers:";
         if (!empty($conf['peers'])) {
             foreach ($conf['peers'] as $k => $v) {
                 if (!empty($v['# PublicKey'])) {
@@ -1375,7 +1380,7 @@ DNS-over-HTTPS with IP:
                 $text[] = "$t\n";
             }
         }
-        $text = "Menu -> Wireguard\n\n<code>" . implode(PHP_EOL, $text) . '</code>';
+        $text = "Menu -> Wireguard\n\n$graf_link<code>" . implode(PHP_EOL, $text) . '</code>';
         $bt = $this->getPacConf()['blocktorrent'];
         $data = [
             [

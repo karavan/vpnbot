@@ -79,6 +79,7 @@ services:
             ADDRESS: ${WGADDRESS}
             WGPORT: ${WGPORT}
             SSPORT: ${SSPORT}
+            GRPORT: ${GRPORT}
         hostname: unit
         restart: unless-stopped
         stop_grace_period: 1s
