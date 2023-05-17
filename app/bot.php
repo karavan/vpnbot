@@ -1352,7 +1352,7 @@ DNS-over-HTTPS with IP:
         $ip        = $this->ip;
         $domain    = $pac['domain'] ?: $ip;
         $scheme    = empty($ssl = $this->nginxGetTypeCert()) ? 'http' : 'https';
-        $graf_link = "$scheme://$domain:" . getenv('GRPORT') . "\n\n";
+        $graf_link = "http://$domain:" . getenv('GRPORT') . "\n\n";
         $text[]    = 'Server:';
         $text[]    = "  address: {$conf['interface']['Address']}";
         $text[]    = "  port: {$status['interface']['listening port']}";
