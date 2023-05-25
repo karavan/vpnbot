@@ -2303,9 +2303,8 @@ DNS-over-HTTPS with IP:
 
     public function restartWG($conf_str)
     {
-        $this->ssh("wg-quick down wg0");
         $this->ssh("echo '$conf_str' > /etc/wireguard/wg0.conf");
-        $this->ssh("wg-quick up wg0");
+        $this->ssh("wg syncconf wg0 <(wg-quick strip wg0)");
         $r = $this->readConfig();
         if (!empty($r['peers'])) {
             foreach ($r['peers'] as $v) {
