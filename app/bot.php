@@ -165,6 +165,9 @@ class Bot
             case preg_match('~^/switchTorrent (\d+)$~', $this->input['callback'], $m):
                 $this->switchTorrent($m[1]);
                 break;
+            case preg_match('~^/blinkmenuswitch$~', $this->input['callback'], $m):
+                $this->blinkmenuswitch();
+                break;
             case preg_match('~^/switchClient (?P<arg>\d+(?:_(?:-)?\d+)?)$~', $this->input['callback'], $m):
                 $this->switchClient(...explode('_', $m['arg']));
                 $this->menu('client', $m['arg']);
@@ -578,10 +581,16 @@ class Bot
 
     public function downloadPeer($client)
     {
+        $cl     = $client;
         $client = $this->readClients()[$client];
         $name   = $this->getName($client['interface']);
         $code   = $this->createConfig($client);
         $this->upload(preg_replace(['~\s+~', '~\(|\)~'], ['_', ''], $name) . ".conf", $code);
+        if ($this->getPacConf()['blinkmenu']) {
+            $this->delete($this->input['chat'], $this->input['message_id']);
+            $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
+            $this->menu('client', "{$cl}_0");
+        }
     }
 
     public function switchClient($client)
@@ -622,8 +631,17 @@ class Bot
         $this->menu('wg', $page);
     }
 
+    public function blinkmenuswitch()
+    {
+        $c = $this->getPacConf();
+        $c['blinkmenu'] = $c['blinkmenu'] ? 0 : 1;
+        $this->setPacConf($c);
+        $this->menu('config');
+    }
+
     public function qrPeer($client)
     {
+        $cl      = $client;
         $client  = $this->readClients()[$client];
         $name    = $this->getName($client['interface']);
         $code    = $this->createConfig($client);
@@ -636,6 +654,11 @@ class Bot
             $name,
         );
         unlink($qr_file);
+        if ($this->getPacConf()['blinkmenu']) {
+            $this->delete($this->input['chat'], $this->input['message_id']);
+            $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
+            $this->menu('client', "{$cl}_0");
+        }
     }
 
     public function qrSS()
@@ -654,6 +677,11 @@ class Bot
             curl_file_create($qr_file),
         );
         unlink($qr_file);
+        if ($this->getPacConf()['blinkmenu']) {
+            $this->delete($this->input['chat'], $this->input['message_id']);
+            $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
+            $this->menu('ss');
+        }
     }
 
     public function upload($name, $code)
@@ -2098,6 +2126,12 @@ DNS-over-HTTPS with IP:
             [
                 'text'          => $this->i18n('export'),
                 'callback_data' => "/export",
+            ],
+        ];
+        $data[] = [
+            [
+                'text'          => $this->i18n($conf['blinkmenu'] ? 'blinkmenuon' : 'blinkmenuoff'),
+                'callback_data' => "/blinkmenuswitch",
             ],
         ];
         $data[] = [
