@@ -1,6 +1,6 @@
 telegram bot to manage servers (inside the bot)
 
-<img src="https://github.com/mercurykd/vpnbot/assets/30900414/8442039d-6b54-4cb1-8826-22a87d9e6748" width="200">
+<img src="https://github.com/mercurykd/vpnbot/assets/30900414/408f43a5-51eb-4d45-a950-cd795fdc7858" width="200">
 
 ### Wireguard
 - create
@@ -29,6 +29,10 @@ telegram bot to manage servers (inside the bot)
 ### PAC
 - the ability to create your own PAC available by url with the ability to substitute the final ip and port
 <img src="https://github.com/mercurykd/vpnbot/assets/30900414/5343e009-1b21-450f-918d-b811b98a0549" width="200">
+
+### MTProto
+- change secret
+<img src="https://github.com/mercurykd/vpnbot/assets/30900414/411696d8-172a-4dac-b6b7-4a6da3adfab2" width="200">
 
 ### Settings
 - add/change admin
