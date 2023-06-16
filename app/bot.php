@@ -1984,12 +1984,15 @@ DNS-over-HTTPS with IP:
                 if (empty($v['# PublicKey'])) {
                     preg_match_all('~([0-9.]+\.?)\s(\w+)~', $v['status']['transfer'], $m);
                     $tr = $m[0] ? ceil($m[1][1]) . '↓' . substr($m[2][1], 0, 1) . '/' . ceil($m[1][0]) . '↑' . substr($m[2][0], 0, 1) : '';
+                } else {
+                    $tr = '';
                 }
                 $data[] = [[
                     'text' => implode(' ', [
                         $this->getName($v),
                         $this->getTime(strtotime($v['## time'])),
-                        $v['online'] == 'off' ? '🚷' : ($v['online'] ? $tr : '🔌'),
+                        $v['online'] == 'off' ? '🚷' : ($v['online'] ? '🟢' : '🔴'),
+                        $tr,
                     ]),
                     'callback_data' => "/menu client {$k}_$page",
                 ]];
@@ -2765,9 +2768,6 @@ DNS-over-HTTPS with IP:
             if (empty($data['interface']['DNS'])) {
                 $data['interface']['DNS'] = $this->getPacConf()['dns'] ?: $this->dns;
             }
-            if (!empty($data['interface']['## time'])) {
-                $data['interface']['## time'] = $this->getTime(strtotime($data['interface']['## time']));
-            }
         }
         foreach ($data['interface'] as $k => $v) {
             $conf[] = "$k = $v";
@@ -2812,14 +2812,16 @@ DNS-over-HTTPS with IP:
         $private_peer_key  = trim($this->ssh("wg genkey"));
         $public_peer_key   = trim($this->ssh("echo $private_peer_key | wg pubkey"));
 
+        $name = ($name ? "$name" : '') . time();
+
         $conf['peers'][] = [
-            '## name'    => $client_ip . ($name ? " ($name)" : ''),
+            '## name'    => $name,
             'PublicKey'  => $public_peer_key,
             'AllowedIPs' => "$client_ip/32",
         ];
         $client_conf = [
             'interface' => [
-                '## name'    => $client_ip . ($name ? " ($name)" : ''),
+                '## name'    => $name,
                 'PrivateKey' => $private_peer_key,
                 'Address'    => "$client_ip/32",
                 'MTU'        => 1350,
