@@ -190,6 +190,9 @@ class Bot
             case preg_match('~^/addadmin$~', $this->input['callback'], $m):
                 $this->enterAdmin();
                 break;
+            case preg_match('~^/geodb$~', $this->input['callback'], $m):
+                $this->geodb();
+                break;
             case preg_match('~^/adguardreset$~', $this->input['callback'], $m):
                 $this->adguardreset();
                 break;
@@ -2566,6 +2569,11 @@ DNS-over-HTTPS with IP:
                 $data ?: false,
             );
         }
+    }
+
+    public function geodb()
+    {
+        $this->answer($this->input['callback_id'], 'in developing...');
     }
 
     public function linkXray()
