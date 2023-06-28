@@ -16,6 +16,35 @@ volumes:
     adguard:
 
 services:
+    up:
+        build:
+            context: dockerfile
+            dockerfile: nginx.dockerfile
+        volumes:
+            - ./config/.profile:/root/.ashrc:ro
+            - ./config/upstream.conf:/etc/nginx/nginx.conf
+            - ./scripts/start_upstream.sh:/start_upstream.sh
+            - ./ssh:/ssh
+            - ./config/sshd_config:/etc/ssh/sshd_config
+            - ./logs/:/logs/
+        ports:
+            - 443:443
+        hostname: upstream
+        depends_on:
+            php:
+                condition: service_healthy
+            ad:
+                condition: service_started
+            ss:
+                condition: service_started
+        environment:
+            TZ: ${TZ}
+        stop_grace_period: 1s
+        command: ["/bin/sh", "/start_upstream.sh"]
+        networks:
+            default:
+                ipv4_address: 10.10.0.10
+        logging: *default-logging
     ng:
         build:
             context: dockerfile
@@ -31,14 +60,9 @@ services:
             - ./logs/:/logs/
         ports:
             - 80:80
-            - 443:443
         hostname: nginx
         depends_on:
-            php:
-                condition: service_healthy
-            ad:
-                condition: service_started
-            ss:
+            up:
                 condition: service_started
         environment:
             TZ: ${TZ}
@@ -60,10 +84,12 @@ services:
             - ./config/unit.json:/config/unit.json
             - ./config/AdGuardHome.yaml:/config/AdGuardHome.yaml
             - ./config/nginx.conf:/config/nginx.conf
+            - ./config/upstream.conf:/config/upstream.conf
             - ./config/nginx_default.conf:/config/nginx_default.conf
             - ./config/ssserver.json:/config/ssserver.json
             - ./config/sslocal.json:/config/sslocal.json
             - ./config/mtprotosecret:/config/mtprotosecret
+            - ./config/xray.json:/config/xray.json
             - ./certs/:/certs/
             - type: volume
               target: /config/adguard
@@ -225,4 +251,25 @@ services:
         networks:
             default:
                 ipv4_address: 10.10.0.8
+        logging: *default-logging
+    xr:
+        build:
+            dockerfile: dockerfile/xray.dockerfile
+        volumes:
+            - ./config/.profile:/root/.ashrc:ro
+            - ./ssh:/ssh
+            - ./config/sshd_config:/etc/ssh/sshd_config
+            - ./config/xray.json:/xray.json
+            - ./scripts/start_xray.sh:/start_xray.sh
+        hostname: xray
+        depends_on:
+            php:
+                condition: service_healthy
+        environment:
+            TZ: ${TZ}
+        stop_grace_period: 1s
+        command: ["/bin/sh", "/start_xray.sh"]
+        networks:
+            default:
+                ipv4_address: 10.10.0.9
         logging: *default-logging

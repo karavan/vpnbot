@@ -253,4 +253,16 @@ $i = [
         'en' => 'clear',
         'ru' => 'очистить',
     ],
+    'xray'  => [
+        'en' => 'XTLS-Reality',
+        'ru' => 'XTLS-Reality',
+    ],
+    'geodb'  => [
+        'en' => 'GeoIp/GeoSite',
+        'ru' => 'GeoIp/GeoSite',
+    ],
+    'changeFakeDomain'  => [
+        'en' => 'changeFakeDomain',
+        'ru' => 'установить фейковый домен',
+    ],
 ];

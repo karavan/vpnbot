@@ -230,6 +230,12 @@ class Bot
             case preg_match('~^/qrSS$~', $this->input['callback'], $m):
                 $this->qrSS();
                 break;
+            case preg_match('~^/qrXray$~', $this->input['callback'], $m):
+                $this->qrXray();
+                break;
+            case preg_match('~^/qrMtproto$~', $this->input['callback'], $m):
+                $this->qrMtproto();
+                break;
             case preg_match('~^/delupstream (\d+)$~', $this->input['callback'], $m):
                 $this->delupstream($m[1]);
                 break;
@@ -262,6 +268,15 @@ class Bot
                 break;
             case preg_match('~^/domain$~', $this->input['callback'], $m):
                 $this->domain();
+                break;
+            case preg_match('~^/xray$~', $this->input['callback'], $m):
+                $this->xray();
+                break;
+            case preg_match('~^/generateSecretXray$~', $this->input['callback'], $m):
+                $this->generateSecretXray();
+                break;
+            case preg_match('~^/changeFakeDomain$~', $this->input['callback'], $m):
+                $this->changeFakeDomain();
                 break;
             case preg_match('~^/include (\d+)$~', $this->input['callback'], $m):
                 $this->include($m[1]);
@@ -342,6 +357,21 @@ class Bot
         }
     }
 
+    public function restartXray($c)
+    {
+        $this->ssh('pkill xray', 'xr');
+        file_put_contents('/config/xray.json', json_encode($c, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->ssh('xray run -config /xray.json > /dev/null 2>&1 &', 'xr');
+    }
+
+    public function linkMtproto()
+    {
+        $s  = file_get_contents('/config/mtprotosecret');
+        $p  = getenv('TGPORT');
+        $ip = $this->getPacConf()['domain'] ?: $this->ip;
+        return "https://t.me/proxy?server=$ip&port=$p&secret=$s";
+    }
+
     public function mtproto()
     {
         $s      = file_get_contents('/config/mtprotosecret');
@@ -351,17 +381,7 @@ class Bot
         $text[] = "Menu -> MTProto\n";
         $text[] = "status: $st\n";
         if ($st == 'on') {
-            $text[] = "<code>https://t.me/proxy?server=$ip&port=$p&secret=$s</code>\n\n<code>tg://proxy?server=$ip&port=$p&secret=$s</code>";
-            $data[] = [
-                [
-                    'text' => "https://t.me/proxy",
-                    'url'  => "https://t.me/proxy?server=$ip&port=$p&secret=$s",
-                ],
-                [
-                    'text' => "tg://proxy",
-                    'url'  => "tg://proxy?server=$ip&port=$p&secret=$s",
-                ],
-            ];
+            $text[] = "<code>{$this->linkMtproto()}</code>";
         }
         $data[] = [
             [
@@ -373,6 +393,12 @@ class Bot
             [
                 'text'          => $this->i18n('setSecret'),
                 'callback_data' => "/setSecret",
+            ],
+        ];
+        $data[] = [
+            [
+                'text'          => $this->i18n('show QR'),
+                'callback_data' => "/qrMtproto",
             ],
         ];
         $data[] = [
@@ -607,8 +633,9 @@ class Bot
     public function pinBackup()
     {
         require __DIR__ . '/config.php';
-        $conf = $this->getPacConf();
-        $pin = $this->upload('vpnbot_export_' . date('d_m_Y_H_i') . '.json', $this->export(), $c['admin'][0])['result']['message_id'];
+        $conf              = $this->getPacConf();
+        $bot               = $this->request('getMyName', [])['result']['name'];
+        $pin               = $this->upload("{$bot}_export_" . date('d_m_Y_H_i') . '.json', $this->export(), $c['admin'][0])['result']['message_id'];
         $conf['pinbackup'] = "$pin/" . time();
         $this->setPacConf($conf);
         $this->pinAdmin($pin);
@@ -727,6 +754,7 @@ class Bot
                 'public'  => file_get_contents('/certs/cert_public'),
             ] : false,
             'mtproto' => file_get_contents('/config/mtprotosecret'),
+            'xray'    => json_decode(file_get_contents('/config/xray.json'), true),
 
         ];
         return json_encode($conf, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -734,7 +762,8 @@ class Bot
 
     public function exportManual()
     {
-        return $this->upload('vpnbot_export_' . date('d_m_Y_H_i') . '.json', $this->export());
+        $bot = $this->request('getMyName', [])['result']['name'];
+        return $this->upload("{$bot}_export_" . date('d_m_Y_H_i') . '.json', $this->export());
     }
 
     public function import()
@@ -810,6 +839,13 @@ class Bot
                 $out[] = 'update mtproto';
                 $this->update($this->input['chat'], $this->input['message_id'], implode("\n", $out));
                 $this->restartTG($json['mtproto']);
+            }
+            // xray
+            if (!empty($json['xray'])) {
+                $out[] = 'update xray';
+                $this->update($this->input['chat'], $this->input['message_id'], implode("\n", $out));
+                $this->restartXray($json['xray']);
+                $this->setUpstreamDomain($json['xray']['inbounds'][0]['streamSettings']['realitySettings']['serverNames'][0]);
             }
             // nginx
             $out[] = 'reset nginx';
@@ -940,12 +976,49 @@ class Bot
         $r = $this->sendPhoto(
             $this->input['chat'],
             curl_file_create($qr_file),
+            "<code>$ss_link</code>"
         );
         unlink($qr_file);
         if ($this->getPacConf()['blinkmenu']) {
             $this->delete($this->input['chat'], $this->input['message_id']);
             $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
             $this->menu('ss');
+        }
+    }
+
+    public function qrXray()
+    {
+        $link    = $this->linkXray();
+        $qr_file = __DIR__ . "/qr/xray.png";
+        exec("qrencode -t png -o $qr_file '$link'");
+        $r = $this->sendPhoto(
+            $this->input['chat'],
+            curl_file_create($qr_file),
+            "<code>$link</code>"
+        );
+        unlink($qr_file);
+        if ($this->getPacConf()['blinkmenu']) {
+            $this->delete($this->input['chat'], $this->input['message_id']);
+            $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
+            $this->xray();
+        }
+    }
+
+    public function qrMtproto()
+    {
+        $link    = $this->linkMtproto();
+        $qr_file = __DIR__ . "/qr/mtproto.png";
+        exec("qrencode -t png -o $qr_file '$link'");
+        $r = $this->sendPhoto(
+            $this->input['chat'],
+            curl_file_create($qr_file),
+            "<code>$link</code>"
+        );
+        unlink($qr_file);
+        if ($this->getPacConf()['blinkmenu']) {
+            $this->delete($this->input['chat'], $this->input['message_id']);
+            $this->input['message_id'] = $this->send($this->input['chat'], '.')['result']['message_id'];
+            $this->mtproto();
         }
     }
 
@@ -2409,14 +2482,14 @@ DNS-over-HTTPS with IP:
                             'callback_data' => "/menu wg 0",
                         ],
                         [
-                            'text'          => $this->i18n('sh_title'),
-                            'callback_data' => "/menu ss",
+                            'text'          => $this->i18n('ad_title'),
+                            'callback_data' => "/menu adguard",
                         ],
                     ],
                     [
                         [
-                            'text'          => $this->i18n('ad_title'),
-                            'callback_data' => "/menu adguard",
+                            'text'          => $this->i18n('sh_title'),
+                            'callback_data' => "/menu ss",
                         ],
                         [
                             'text'          => $this->i18n('pac'),
@@ -2425,9 +2498,19 @@ DNS-over-HTTPS with IP:
                     ],
                     [
                         [
+                            'text'          => $this->i18n('xray'),
+                            'callback_data' => "/xray",
+                        ],
+                        [
+                            'text'          => $this->i18n('geodb'),
+                            'callback_data' => "/geodb",
+                        ],
+                    ],
+                    [
+                        [
                             'text'          => $this->i18n('mtproto'),
                             'callback_data' => "/mtproto",
-                        ]
+                        ],
                     ],
                     [
                         [
@@ -2483,6 +2566,97 @@ DNS-over-HTTPS with IP:
                 $data ?: false,
             );
         }
+    }
+
+    public function linkXray()
+    {
+        $c      = $this->getXray();
+        $pac    = $this->getPacConf();
+        $domain = $pac['domain'] ?: $this->ip;
+        return "vless://{$c['inbounds'][0]['settings']['clients'][0]['id']}@$domain:443?security=reality&sni={$c['inbounds'][0]['streamSettings']['realitySettings']['serverNames'][0]}&fp=chrome&pbk={$pac['xray']}&sid={$c['inbounds'][0]['streamSettings']['realitySettings']['shortIds'][0]}&type=tcp&flow=xtls-rprx-vision#vpnbot";
+    }
+
+    public function xray()
+    {
+        $c      = $this->getXray();
+        $pac    = $this->getPacConf();
+        $domain = $pac['domain'] ?: $this->ip;
+        $st     = $this->ssh('pgrep xray', 'xr') ? 'on' : 'off';
+        $text[] = "Menu -> " . $this->i18n('xray') . "\n";
+        $text[] = "uuid: <code>{$c['inbounds'][0]['settings']['clients'][0]['id']}</code>";
+        $text[] = "shortId: <code>{$c['inbounds'][0]['streamSettings']['realitySettings']['shortIds'][0]}</code>";
+        $text[] = "pubkey: <code>{$pac['xray']}</code>";
+        $text[] = "fake domain: <code>{$c['inbounds'][0]['streamSettings']['realitySettings']['serverNames'][0]}</code>";
+        if ($c['inbounds'][0]['settings']['clients'][0]['id']) {
+            $text[] = "\n<code>{$this->linkXray()}</code>";
+        }
+        $text[] = "\nstatus: $st";
+
+        $data[] = [
+            [
+                'text'          => $this->i18n('generateSecret'),
+                'callback_data' => "/generateSecretXray",
+            ],
+        ];
+        $data[] = [
+            [
+                'text'          => $this->i18n('changeFakeDomain'),
+                'callback_data' => "/changeFakeDomain",
+            ],
+        ];
+        if ($c['inbounds'][0]['settings']['clients'][0]['id']) {
+            $data[] = [
+                [
+                    'text'          => $this->i18n('show QR'),
+                    'callback_data' => "/qrXray",
+                ],
+            ];
+        }
+        $data[] = [
+            [
+                'text'          => $this->i18n('back'),
+                'callback_data' => "/menu",
+            ],
+        ];
+        $this->update(
+            $this->input['chat'],
+            $this->input['message_id'],
+            implode("\n", $text ?: ['...']),
+            $data ?: false,
+        );
+    }
+
+    public function getXray()
+    {
+        return json_decode(file_get_contents('/config/xray.json'), true);
+    }
+
+    public function generateSecretXray()
+    {
+        $c       = $this->getXray();
+        $uuid    = trim($this->ssh('xray uuid', 'xr'));
+        $shortId = trim($this->ssh('openssl rand -hex 8', 'xr'));
+        $keys    = $this->ssh('xray x25519', 'xr');
+        preg_match('~^Private key:\s([^\s]+)~m', $keys, $m);
+        $private = trim($m[1]);
+        preg_match('~^Public key:\s([^\s]+)~m', $keys, $m);
+        $public = trim($m[1]);
+        $c['inbounds'][0]['settings']['clients'][0]['id'] = $uuid;
+        $c['inbounds'][0]['streamSettings']['realitySettings']['privateKey'] = $private;
+        $c['inbounds'][0]['streamSettings']['realitySettings']['shortIds'][0] = $shortId;
+        $pac         = $this->getPacConf();
+        $pac['xray'] = $public;
+        $this->setPacConf($pac);
+        $this->restartXray($c);
+        $this->xray();
+    }
+
+    public function setUpstreamDomain($domain)
+    {
+        $nginx = file_get_contents('/config/upstream.conf');
+        $t = preg_replace('~#domain.+#domain~s', "#domain\n$domain reality;\n#domain", $nginx);
+        file_put_contents('/config/upstream.conf', $t);
+        $this->ssh("nginx -s reload 2>&1", 'up');
     }
 
     public function addWg($page)
@@ -2805,6 +2979,32 @@ DNS-over-HTTPS with IP:
             'callback'       => 'setBackup',
             'args'           => [],
         ];
+    }
+
+    public function changeFakeDomain()
+    {
+        $r = $this->send(
+            $this->input['chat'],
+            "@{$this->input['username']} enter domain",
+            $this->input['message_id'],
+            reply: 'enter domain',
+        );
+        $_SESSION['reply'][$r['result']['message_id']] = [
+            'start_message'  => $this->input['message_id'],
+            'start_callback' => $this->input['callback_id'],
+            'callback'       => 'setFakeDomain',
+            'args'           => [],
+        ];
+    }
+
+    public function setFakeDomain($domain)
+    {
+        $c = $this->getXray();
+        $c['inbounds'][0]['streamSettings']['realitySettings']['serverNames'][0] = $domain;
+        $c['inbounds'][0]['streamSettings']['realitySettings']['dest'] = "$domain:443";
+        $this->restartXray($c);
+        $this->setUpstreamDomain($domain);
+        $this->xray();
     }
 
     public function setBackup($text)
