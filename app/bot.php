@@ -2505,12 +2505,6 @@ DNS-over-HTTPS with IP:
                             'callback_data' => "/xray",
                         ],
                         [
-                            'text'          => $this->i18n('geodb'),
-                            'callback_data' => "/geodb",
-                        ],
-                    ],
-                    [
-                        [
                             'text'          => $this->i18n('mtproto'),
                             'callback_data' => "/mtproto",
                         ],
