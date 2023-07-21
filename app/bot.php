@@ -939,6 +939,7 @@ class Bot
         } else {
             $this->ssh('bash /unblock_torrent.sh');
         }
+        $this->answer($this->input['callback_id'], 'доступ к торрентам ' . ($c['blocktorrent'] ? 'заблокирован' : 'разблокирован'), true);
         $this->menu('wg', $page);
     }
     public function switchExchange($page)
@@ -951,6 +952,7 @@ class Bot
         } else {
             $this->ssh('bash /unblock_exchange.sh');
         }
+        $this->answer($this->input['callback_id'], 'обмен между пользователями ' . ($c['exchange'] ? 'заблокирован' : 'разблокирован'), true);
         $this->menu('wg', $page);
     }
 
