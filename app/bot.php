@@ -2181,7 +2181,7 @@ DNS-over-HTTPS with IP:
                     'text' => implode(' ', [
                         $this->getName($v),
                         $this->getTime(strtotime($v['## time'])),
-                        $v['online'] == 'off' ? '🚷' : ($v['online'] ? '🟢' : '🔴'),
+                        $v['online'] == 'off' ? '🚷' : $this->i18n($v['online'] ? 'on' : 'off'),
                         $tr,
                     ]),
                     'callback_data' => "/menu client {$k}_$page",
