@@ -136,6 +136,9 @@ class Bot
             case preg_match('~^/clearLog (?P<arg>\d+(?:_(?:-)?\d+)?)$~', $this->input['callback'], $m):
                 $this->clearLog(...explode('_', $m['arg']));
                 break;
+            case preg_match('~^/delLog (?P<arg>\d+(?:_(?:-)?\d+)?)$~', $this->input['callback'], $m):
+                $this->delLog(...explode('_', $m['arg']));
+                break;
             case preg_match('~^/debug$~', $this->input['callback'], $m):
                 $this->debug();
                 break;
@@ -1342,7 +1345,7 @@ class Bot
             case 'letsencrypt':
                 $out[] = 'Install certificate:';
                 $this->update($this->input['chat'], $this->input['message_id'], implode("\n", $out));
-                exec("certbot certonly --force-renew --preferred-chain 'ISRG Root X1' -n --agree-tos --email mail@{$conf['domain']} -d {$conf['domain']} -d oc.{$conf['domain']} --webroot -w /certs/ --logs-dir /logs 2>&1", $out, $code);
+                exec("certbot certonly --force-renew --preferred-chain 'ISRG Root X1' -n --agree-tos --email mail@{$conf['domain']} -d {$conf['domain']} -d oc.{$conf['domain']} --webroot -w /certs/ --logs-dir /logs --max-log-backups 0 2>&1", $out, $code);
                 if ($code > 0) {
                     $this->send($this->input['chat'], "ERROR\n" . implode("\n", $out));
                     break;
@@ -2790,11 +2793,15 @@ DNS-over-HTTPS with IP:
 
     public function ocMenu()
     {
-        $pac = $this->getPacConf();
-        preg_match('~^camouflage_secret[^\n]+?"([^"]+)*"~sm', file_get_contents('/config/ocserv.conf'), $m);
+        $pac    = $this->getPacConf();
+        $ocserv = file_get_contents('/config/ocserv.conf');
+        preg_match('~^camouflage_secret[^\n]+?"([^"]+)*"~sm', $ocserv, $m);
+        $cs = $m[1];
+        preg_match('~^dns = ([^\n]+)~sm', $ocserv, $m);
+        $dns = $m[1];
         $text[] = "Menu -> OpenConnect";
         if (!empty($m[1])) {
-            $text[] = "<code>https://oc.{$pac['domain']}/?{$m[1]}</code>";
+            $text[] = "<code>https://oc.{$pac['domain']}/?$cs</code>";
         }
         $text[] = "password: <span class='tg-spoiler'>{$pac['ocserv']}</span>";
         $data[] = [
@@ -2807,7 +2814,7 @@ DNS-over-HTTPS with IP:
                 'callback_data' => "/changeOcPass",
             ],
             [
-                'text'          => $this->i18n('dns'),
+                'text'          => $this->i18n('dns') . ": $dns",
                 'callback_data' => "/changeOcDns",
             ],
         ];
@@ -3228,6 +3235,10 @@ DNS-over-HTTPS with IP:
                         'text'          => $this->i18n('clear'),
                         'callback_data' => "/clearLog $k",
                     ],
+                    [
+                        'text'          => $this->i18n('delete'),
+                        'callback_data' => "/delLog $k",
+                    ],
                 ];
             }
         }
@@ -3263,6 +3274,17 @@ DNS-over-HTTPS with IP:
         foreach (scandir('/logs/') as $k => $v) {
             if ($i == $k) {
                 file_put_contents("/logs/$v", '');
+                break;
+            }
+        }
+        $this->logs();
+    }
+
+    public function delLog($i)
+    {
+        foreach (scandir('/logs/') as $k => $v) {
+            if ($i == $k) {
+                unlink("/logs/$v");
                 break;
             }
         }
