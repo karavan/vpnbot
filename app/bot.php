@@ -2904,8 +2904,8 @@ DNS-over-HTTPS with IP:
                     ],
                     [
                         [
-                            'text'          => $this->i18n('config'),
-                            'callback_data' => "/menu config",
+                            'text'          => $this->i18n('naive'),
+                            'callback_data' => "/menu naive",
                         ],
                         [
                             'text'          => $this->i18n('pac'),
@@ -2914,8 +2914,8 @@ DNS-over-HTTPS with IP:
                     ],
                     [
                         [
-                            'text'          => $this->i18n('naive'),
-                            'callback_data' => "/menu naive",
+                            'text'          => $this->i18n('config'),
+                            'callback_data' => "/menu config",
                         ],
                     ],
                     [
@@ -2987,6 +2987,7 @@ DNS-over-HTTPS with IP:
     {
         $pac    = $this->getPacConf();
         $text[] = "Menu -> NaiveProxy";
+        $text[] = "<code>https://np.{$pac['domain']}</code>";
         $text[] = "user: <span class='tg-spoiler'>{$pac['naive']['user']}</span>";
         $text[] = "password: <span class='tg-spoiler'>{$pac['naive']['pass']}</span>";
         $data[] = [
