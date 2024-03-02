@@ -3,7 +3,7 @@ b:
 u: # запуск контейнеров
 	IP=$(shell ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$$|\1|p' | awk '{print $1}' | head -1) VER=$(shell git describe --tags) docker compose up -d --force-recreate
 d: # остановка контейнеров
-	docker compose down
+	docker compose down --remove-orphans
 dv: # остановка контейнеров
 	docker compose down -v
 r: d cleanf u cleanf
@@ -15,6 +15,8 @@ php: # консоль сервиса
 	docker compose exec php /bin/sh
 wg: # консоль сервиса
 	docker compose exec wg /bin/sh
+wg1: # консоль сервиса
+	docker compose exec wg1 /bin/sh
 ss: # консоль сервиса
 	docker compose exec ss /bin/sh
 ng: # консоль сервиса
@@ -55,3 +57,6 @@ push:
 	docker compose push
 s:
 	git status -su
+c:
+	git add config/
+	git checkout .
