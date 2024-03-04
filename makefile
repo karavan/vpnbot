@@ -2,7 +2,7 @@ b:
 	docker compose build
 u: # запуск контейнеров
 	bash ./update/update.sh &
-	IP=$(shell ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$$|\1|p' | awk '{print $1}' | head -1) VER=$(shell git describe --tags) docker compose up -d --force-recreate
+	IP=$(shell curl https://ipinfo.io/ip) VER=$(shell git describe --tags) docker compose up -d --force-recreate
 d: # остановка контейнеров
 	-kill -9 $(shell cat ./update/update_pid) > /dev/null
 	docker compose down --remove-orphans
@@ -55,3 +55,4 @@ s:
 c:
 	git add config/
 	git checkout .
+	git reset
