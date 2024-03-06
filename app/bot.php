@@ -2542,7 +2542,7 @@ DNS-over-HTTPS with IP:
         if ($clients) {
             $name = $this->getName($clients[$client]['interface']);
             $conf = $this->createConfig($clients[$client]);
-            if ($this->getInstanceWG(1)) {
+            if ($this->getWGType() == 'awg') {
                 $sl = $this->getAmneziaShortLink($clients[$client]);
             }
             return [
@@ -2620,7 +2620,7 @@ DNS-over-HTTPS with IP:
                 if (!empty($v['# PublicKey'])) {
                     $conf['peers'][$k]['online'] = 'off';
                 } else {
-                    $conf['peers'][$k]['status'] = $this->getStatusPeer($v['PublicKey'], $status['peers']);
+                    $conf['peers'][$k]['status'] = $status ? $this->getStatusPeer($v['PublicKey'], $status['peers']) : 'error';
                     $conf['peers'][$k]['online'] = preg_match('~^(\d+ seconds|[12] minute)~', $conf['peers'][$k]['status']['latest handshake']) ? 'online' : '';
                 }
             }
