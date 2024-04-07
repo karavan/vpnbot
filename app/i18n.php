@@ -166,12 +166,12 @@ $i = [
         'ru' => 'Некоторым клиентам требуется валидный сертификат при подключении, например Windows 11 DoH или ShadowSocks Android (URL-адрес PAC), для этого требуется домен',
     ],
     'self list explain'    => [
-        'en' => ' - domains that will work through a proxy',
-        'ru' => ' - домены, которые будут работать через прокси',
+        'en' => ' - domains that will work through a proxy, all others directly',
+        'ru' => ' - домены, которые будут работать через прокси, все остальные напрямую',
     ],
     'reverse list explain' => [
-        'en' => ' - domains that will work without a proxy, all others through a proxy',
-        'ru' => ' - домены которые будут работать без прокси, все остальные через прокси',
+        'en' => ' - domains that will work directly, all others through a proxy',
+        'ru' => ' - домены которые будут работать напрямую, все остальные через прокси',
     ],
     'timer'                => [
         'en' => 'set timer',
@@ -320,5 +320,13 @@ $i = [
     'browser_notify_off'  => [
         'en' => 'web panel is only available from telegram',
         'ru' => 'веб панель доступна только из телеграмма',
+    ],
+    'no updates'  => [
+        'en' => 'no updates',
+        'ru' => 'нет обновлений',
+    ],
+    'have updates'  => [
+        'en' => 'have updates',
+        'ru' => 'есть обновления',
     ],
 ];
