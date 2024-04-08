@@ -3470,7 +3470,7 @@ DNS-over-HTTPS with IP:
         );
     }
 
-    public function userXr($i)
+    public function userXr($i, $fs = 0)
     {
         $c        = $this->getXray();
         $domain   = $this->getPacConf()['domain'] ?: $this->ip;
@@ -3479,13 +3479,21 @@ DNS-over-HTTPS with IP:
         $v2ray    = "$scheme://{$domain}/pac?h=$hash&t=s&s={$c['inbounds'][0]['settings']['clients'][$i]['id']}";
         $sing     = "$scheme://{$domain}/pac?h=$hash&t=si&s={$c['inbounds'][0]['settings']['clients'][$i]['id']}";
         $fullsing = 'sing-box://import-remote-profile/?url=' . urlencode("$scheme://{$domain}/pac?h=$hash&t=si&s={$c['inbounds'][0]['settings']['clients'][$i]['id']}") . "#vpnbot$i";
-
+        if (!empty($fs)) {
+            return $fullsing;
+        }
 
         $text[] = "Menu -> " . $this->i18n('xray') . " -> {$c['inbounds'][0]['settings']['clients'][$i]['email']}\n";
         $text[] = "<code>{$this->linkXray($i)}</code>\n";
         $text[] = "v2ray subscription: <code>$v2ray</code>";
         $text[] = "sing-box subscription: <code>$sing</code>";
 
+        $data[] = [
+            [
+                'text'    => 'sing-box subscription',
+                'web_app' => ['url' => "$scheme://{$domain}/pac?h=$hash&b=1&t=si&s={$c['inbounds'][0]['settings']['clients'][$i]['id']}"],
+            ],
+        ];
         $data[] = [
             [
                 'text'          => $this->i18n('show QR'),
@@ -3646,10 +3654,13 @@ DNS-over-HTTPS with IP:
                 ]
             ]
         ];
+        if (empty($c['routing']['rules'][0]['domain'])) {
+            unset($c['routing']['rules'][0]);
+        }
         echo json_encode($c);
     }
 
-    public function singboxSubscription($key)
+    public function singboxSubscription($key, $fs = 0)
     {
         $pac    = $this->getPacConf();
         $domain = $pac['domain'] ?: $this->ip;
@@ -3658,12 +3669,15 @@ DNS-over-HTTPS with IP:
         $flag = true;
         foreach ($xr['inbounds'][0]['settings']['clients'] as $k => $v) {
             if ($v['id'] == $key) {
+                if (!empty($fs)) {
+                    return $this->userXr($k, 1);
+                }
                 $flag = false;
                 break;
             }
         }
         if ($flag) {
-            return;
+            return false;
         }
 
         $c = [
@@ -3785,7 +3799,10 @@ DNS-over-HTTPS with IP:
                 ]
             ]
         ];
-        echo json_encode($c);
+        if (empty($c['route']['rules'][1]['domain'])) {
+            unset($c['route']['rules'][1]);
+        }
+        return json_encode($c);
     }
 
     public function getXray()
