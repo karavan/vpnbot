@@ -6,6 +6,7 @@ class Bot
     public $adguard;
     public $update;
     public $ip;
+    public $limit;
 
     public function __construct($key, $i18n)
     {
@@ -281,8 +282,14 @@ class Bot
             case preg_match('~^/timerXr (\d+)$~', $this->input['callback'], $m):
                 $this->timerXr($m[1]);
                 break;
+            case preg_match('~^/switchXr (\d+)$~', $this->input['callback'], $m):
+                $this->switchXr($m[1]);
+                break;
             case preg_match('~^/delxr (\d+)$~', $this->input['callback'], $m):
                 $this->delxr($m[1]);
+                break;
+            case preg_match('~^/listXr (\d+)$~', $this->input['callback'], $m):
+                $this->listXr($m[1]);
                 break;
             case preg_match('~^/switchTorrent (\d+)$~', $this->input['callback'], $m):
                 $this->switchTorrent($m[1]);
@@ -348,8 +355,8 @@ class Bot
             case preg_match('~^/domain$~', $this->input['callback'], $m):
                 $this->domain();
                 break;
-            case preg_match('~^/xray$~', $this->input['callback'], $m):
-                $this->xray();
+            case preg_match('~^/xray(?: (\d+))?$~', $this->input['callback'], $m):
+                $this->xray($m[1] ?: 0);
                 break;
             case preg_match('~^/generateSecretXray$~', $this->input['callback'], $m):
                 $this->generateSecretXray();
@@ -1046,15 +1053,10 @@ class Bot
     {
         try {
             $c = $this->getXray();
-            $f = 0;
             foreach ($c['inbounds'][0]['settings']['clients'] as $k => $v) {
-                if (!empty($v['time']) && $v['time'] < time()) {
-                    unset($c['inbounds'][0]['settings']['clients'][$k]);
-                    $f = 1;
+                if (!empty($v['time']) && ($v['time'] < time())) {
+                    $this->switchXr($k, 1);
                 }
-            }
-            if (!empty($f)) {
-                $this->restartXray($c);
             }
         } catch (Exception $e) {
         }
@@ -3466,19 +3468,45 @@ DNS-over-HTTPS with IP:
             'email' => $user,
         ];
         $this->restartXray($c);
-        $this->xray();
+        $this->userXr(count($c['inbounds'][0]['settings']['clients']) - 1);
     }
 
     public function setTimerXr($time, $i)
     {
+        $time = strtotime($time);
+        if ($time === false) {
+            $this->send($this->input['chat'], 'wrong format');
+            return;
+        }
         $c = $this->getXray();
         if (empty($time)) {
             unset($c['inbounds'][0]['settings']['clients'][$i]['time']);
         } else {
-            $c['inbounds'][0]['settings']['clients'][$i]['time'] = strtotime($time);
+            if (!empty($c['inbounds'][0]['settings']['clients'][$i]['off'])) {
+                $this->switchXr($i, 1);
+                $c = $this->getXray();
+            }
+            $c['inbounds'][0]['settings']['clients'][$i]['time'] = $time;
         }
         file_put_contents('/config/xray.json', json_encode($c, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $this->userXr($i);
+    }
+
+    public function switchXr($i, $nm = 0)
+    {
+        $c = $this->getXray();
+        unset($c['inbounds'][0]['settings']['clients'][$i]['time']);
+        if (empty($c['inbounds'][0]['settings']['clients'][$i]['off'])) {
+            $c['inbounds'][0]['settings']['clients'][$i]['off'] = $c['inbounds'][0]['settings']['clients'][$i]['id'];
+            $c['inbounds'][0]['settings']['clients'][$i]['id']  = trim($this->ssh('xray uuid', 'xr'));
+        } else {
+            $c['inbounds'][0]['settings']['clients'][$i]['id'] = $c['inbounds'][0]['settings']['clients'][$i]['off'];
+            unset($c['inbounds'][0]['settings']['clients'][$i]['off']);
+        }
+        $this->restartXray($c);
+        if (empty($nm)) {
+            $this->userXr($i);
+        }
     }
 
     public function renXrUs($name, $i)
@@ -3489,7 +3517,15 @@ DNS-over-HTTPS with IP:
         $this->userXr($i);
     }
 
-    public function xray()
+    public function listXr($i)
+    {
+        $c = $this->getPacConf();
+        $c['xtlslist'] = $i;
+        $this->setPacConf($c);
+        $this->xray();
+    }
+
+    public function xray($page = 0)
     {
         if (!$this->ssh('pgrep xray', 'xr')) {
             $this->generateSecretXray();
@@ -3514,6 +3550,31 @@ DNS-over-HTTPS with IP:
             ],
         ];
         foreach ($c['inbounds'][0]['settings']['clients'] as $k => $v) {
+            if (!empty($v['off'])) {
+                $off++;
+            } else {
+                $on++;
+            }
+        }
+        $type   = $this->getPacConf()['xtlslist'];
+        $data[] = [
+            [
+                'text'          => $this->i18n('on') . " $on " . (!$type ? "✅" : ''),
+                'callback_data' => "/listXr 0",
+            ],
+            [
+                'text'          => $this->i18n('off') . " $off " . ($type ? "✅" : ''),
+                'callback_data' => "/listXr 1",
+            ],
+        ];
+        $clients = array_filter($c['inbounds'][0]['settings']['clients'], fn($e) => !$type ? empty($e['off']) : !empty($e['off']));
+        uasort($clients, fn($a, $b) => ($a['time'] ?: PHP_INT_MAX) <=> ($b['time'] ?: PHP_INT_MAX));
+
+        $all     = (int) ceil(count($clients) / $this->limit);
+        $page    = min($page, $all - 1);
+        $page    = $page == -2 ? $all - 1 : $page;
+        $clients = $page != -1 ? array_slice($clients, $page * $this->limit, $this->limit, true) : $clients;
+        foreach ($clients as $k => $v) {
             $time   = $v['time'] ? $this->getTime($v['time']) : '';
             $data[] = [
                 [
@@ -3522,6 +3583,19 @@ DNS-over-HTTPS with IP:
                 ],
             ];
         }
+        if ($page != -1 && $all > 1) {
+            $data[] = [
+                [
+                    'text'          => '<<',
+                    'callback_data' => "/xray " . ($page - 1 >= 0 ? $page - 1 : $all - 1),
+                ],
+                [
+                    'text'          => '>>',
+                    'callback_data' => "/xray " . ($page < $all - 1 ? $page + 1 : 0),
+                ]
+            ];
+        }
+
         $data[] = [
             [
                 'text'          => $this->i18n('back'),
@@ -3558,14 +3632,14 @@ DNS-over-HTTPS with IP:
         $text[] = "v2ray: <a href='$v2ray'>$v2ray</a>\n";
         $text[] = "sing-box: <a href='$sing'>$sing</a>";
 
-        if ($time = $c['inbounds'][0]['settings']['clients'][$i]['time']) {
-            $text[] = "\ntimer: " . $this->getTime($time);
-        }
-
         $data[] = [
             [
-                'text'          => $this->i18n('timer'),
+                'text'          => $c['inbounds'][0]['settings']['clients'][$i]['time'] ? "timer: " . $this->getTime($c['inbounds'][0]['settings']['clients'][$i]['time']) : $this->i18n('timer'),
                 'callback_data' => "/timerXr $i",
+            ],
+            [
+                'text'          => $this->i18n($c['inbounds'][0]['settings']['clients'][$i]['off'] ? 'off' : 'on'),
+                'callback_data' => "/switchXr $i",
             ],
         ];
         $data[] = [
@@ -3612,7 +3686,9 @@ DNS-over-HTTPS with IP:
                 if (!empty($fs)) {
                     return $this->userXr($k, 0, 1);
                 }
-                $flag = false;
+                if (empty($v['off'])) {
+                    $flag = false;
+                }
                 break;
             }
         }
@@ -3649,15 +3725,16 @@ DNS-over-HTTPS with IP:
                 if (!empty($fs)) {
                     return $this->userXr($k, 1);
                 }
-                $flag = false;
+                if (empty($v['off'])) {
+                    $flag = false;
+                }
+
                 break;
             }
         }
         if ($flag) {
             return false;
         }
-
-
 
         $c = json_decode(file_get_contents('/config/sing.json'), true);
 
